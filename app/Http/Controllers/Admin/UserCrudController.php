@@ -35,10 +35,10 @@ class UserCrudController extends CrudController
 
             // Disable create/delete access for non-admins
             $this->crud->denyAccess(['create', 'delete']);
-        }else{
-             CRUD::addClause('whereDoesntHave', 'roles', function ($query) {
-        $query->where('name', 'admin');
-    });
+        } else {
+            CRUD::addClause('whereDoesntHave', 'roles', function ($query) {
+                $query->where('name', 'admin');
+            });
         }
     }
 
@@ -48,8 +48,53 @@ class UserCrudController extends CrudController
      * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
      * @return void
      */
+     public function updateCrud()
+    {
+        $request = $this->crud->getRequest();
+
+        // Prevent updating password if it's blank
+        if (!$request->filled('password')) {
+            $request->request->remove('password');
+        }
+
+        return parent::updateCrud(); // ✅ Not `update()`, but `updateCrud()`
+    }
+//     public function storeCrud()
+// {
+//     $request = $this->crud->getRequest();
+
+//     // Validate incoming data
+//     $validated = $request->validate([
+//         'name' => 'required|string|max:255',
+//         'email' => 'required|email|unique:users,email',
+//         'password' => 'required|string|min:8|confirmed',
+//     ]);
+
+//     // Hash password before saving
+//     $validated['password'] = bcrypt($validated['password']);
+
+//     // Create the user
+//     $user = $this->crud->model->create($validated);
+
+//     // Example: Assign default role
+//     $user->assignRole('User');
+
+//     \Alert::success('User created successfully')->flash();
+
+//     return redirect($this->crud->route);
+
+
     protected function setupListOperation()
     {
+
+        // $this->crud->set('show.setFromDb', false);
+        $this->crud->addColumn([
+            'name'  => 'S.No',
+            'label' => '#',
+            'type'  => 'model_function',
+            'function_name' => 'getRowNumber',
+            'orderable' => false,
+        ]);
 
         CRUD::setFromDb(); // set columns from db columns.
 
@@ -71,7 +116,12 @@ class UserCrudController extends CrudController
         // set fields from db columns.
         $this->crud->setOperationSetting('groupedErrors', false);
         $this->crud->setOperationSetting('inlineErrors', true);
-
+        // CRUD::addField([
+        //     'name' => 'pic',
+        //     'label' => 'Profile Picture',
+        //     'type' => 'upload',
+        //     'upload' => true,
+        // ]);
 
 
 
@@ -96,19 +146,7 @@ class UserCrudController extends CrudController
          * - CRUD::field('price')->type('number');
          */
     }
-public function storeCrud()
-{
-    $request = $this->crud->getRequest();
-
-    // Example: Get input values
-    $name = $request->input('name');
-    $email = $request->input('email');
-
-    // Run Backpack’s default store logic
-    $response = $this->store();
-
-    return $response;
-}
+   
     /**
      * Define what happens when the Update operation is loaded.
      * 
@@ -121,7 +159,5 @@ public function storeCrud()
     {
         $this->setupCreateOperation();
     }
-    public function assignedUser(){
-
-    }
+    public function assignedUser() {}
 }

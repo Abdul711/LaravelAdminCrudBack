@@ -34,6 +34,45 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+        public function getRowNumber()
+    {
+        $page = request()->get('page', 1);
+        $perPage = request()->get('limit', config('backpack.crud.default_page_length', 25));
+        static $i = 1;
+        return (($page - 1) * $perPage) + $i++;
+    }
+    //    public function setPicAttribute($value)
+    // {
+    //     if (request()->hasFile('pic')) {
+    //         $file = request()->file('pic');
+
+    //         // Format filename: UserName.extension
+    //         $name = $this->attributes['name'] ?? 'user'; // fallback if name is missing
+    //         $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $name); // clean the name
+    //         $extension = $file->getClientOriginalExtension();
+    //         $filename = $safeName . '.' . $extension;
+
+    //         $destination = public_path('profilepic');
+
+    //         if (!file_exists($destination)) {
+    //             mkdir($destination, 0775, true);
+    //         }
+
+    //         // Optionally delete old file
+    //         if (!empty($this->attributes['pic'])) {
+    //             $old = public_path($this->attributes['pic']);
+    //             if (file_exists($old)) {
+    //                 @unlink($old);
+    //             }
+    //         }
+
+    //         // Move file
+    //         $file->move($destination, $filename);
+
+    //         // Save relative path in DB
+    //         $this->attributes['pic'] =  $filename;
+    //     }
+    // }
     protected static function booted()
 {
     static::creating(function ($user) {
